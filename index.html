@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>I AM BREAD BOX</title>
+    <meta property="og:title" content="I AM BREAD BOX">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        body {
+            background-color: #EDEFF1;
+            height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        #title {
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+        #prompt {
+            font-size: 20px;
+            color: #888;
+            margin-top: 20px;
+        }
+        .emoji-box {
+            font-size: 120px;
+            animation: boxPop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 0;
+        }
+        .emoji-bread {
+            font-size: 60px;
+            position: fixed;
+            transform-origin: center;
+            opacity: 0;
+            z-index: 1;
+        }
+        @keyframes boxPop {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(5px) scale(0.95); }
+        }
+    </style>
+</head>
+<body>
+    <div id="title">Yes, I am.</div>
+    <div id="emoji-box" class="emoji-box">📦</div>
+    <div id="prompt">Did you mean <a href="https://yourbreadbox.ca">yourbreadbox.ca</a>?</div>
+
+    <script>
+        const breads = ["🥯", "🍞", "🥖", "🥨", "🥐", "🫓"];
+        const box = document.querySelector(".emoji-box");
+        const gravity = 49.81; // Simulate earth's gravity
+        const breadRate = 500; // Generate bread every 500 ms
+
+        const getRandom = (min, max) => Math.random() * (max - min) + min;
+
+        const generateBread = () => {
+            const initialSpeed = getRandom(150, 300);
+            const launchAngle = getRandom(Math.PI/6, Math.PI/2);
+            const direction = Math.random() < 0.5 ? -1 : 1;
+            const bread = breads[Math.floor(Math.random() * breads.length)];
+            const spinSpeed = getRandom(0.05, 0.1);
+
+            const emoji = document.createElement("div");
+            emoji.textContent = bread;
+            emoji.className = "emoji-bread";
+            emoji.style.left = `${window.innerWidth / 2 - 30}px`;
+            emoji.style.top = `${window.innerHeight / 2 - 30}px`;
+            document.body.appendChild(emoji);
+
+            const startTime = performance.now();
+            const step = () => {
+                const time = (performance.now() - startTime) / 1000;
+                const x = direction * time * initialSpeed * Math.cos(launchAngle) * 0.5;
+                const y = time * initialSpeed * Math.sin(launchAngle) - 0.5 * gravity * time * time;
+
+                emoji.style.transform = `translate(${Math.round(x)}px, ${Math.round(-y)}px) rotate(${spinSpeed * time}turn)`;
+                emoji.style.opacity = `${Math.min(time * 4, 1)}`;
+
+                if (window.innerHeight / 2 - y - emoji.offsetHeight > window.innerHeight ||
+                    window.innerWidth / 2 + x + emoji.offsetWidth < 0 ||
+                    window.innerWidth / 2 + x - emoji.offsetWidth > window.innerWidth) {
+                    document.body.removeChild(emoji);
+                } else {
+                    requestAnimationFrame(step);
+                }
+            };
+            step();
+        };
+
+        const startPop = () => {
+            box.style.animation = 'none';
+            void box.offsetHeight; // Trigger reflow
+            box.style.animation = "boxPop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+        };
+
+        window.setInterval(() => {
+            startPop();
+            generateBread();
+        }, breadRate);
+    </script>
+</body>
+</html>
